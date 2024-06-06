@@ -15,11 +15,6 @@ use tokio;
 use jupiter_swap_api_client::quote::TokenResponse;
 use crate::dex_error::DexError;
 
-//const USDC_MINT: Pubkey = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
-//const NATIVE_MINT: Pubkey = pubkey!("So11111111111111111111111111111111111111112");
-
-//pub const TEST_WALLET: Pubkey = pubkey!("2AQdpHJ2JpcEgPiATUXjQxA8QmafFegfQwSLWSprPicm"); // Coinbase 2 wallet
-
 #[tokio::main]
 async fn main() {
     _main().await;
