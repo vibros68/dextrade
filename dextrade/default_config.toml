@@ -1,0 +1,6 @@
+secret_key_path = ".local/solana_keypair.json"
+
+[swap]
+from_symbol = "SOL"
+to_symbol = "USDC"
+from_amount = 0.005

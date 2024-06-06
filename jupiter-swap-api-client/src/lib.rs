@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use quote::{QuoteRequest, QuoteResponse};
+use quote::{QuoteRequest, QuoteResponse, TokenResponse};
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
 use swap::{SwapInstructionsResponse, SwapInstructionsResponseInternal, SwapRequest, SwapResponse};
@@ -37,6 +37,14 @@ async fn check_status_code_and_deserialize<T: DeserializeOwned>(response: Respon
 impl JupiterSwapApiClient {
     pub fn new(base_path: String) -> Self {
         Self { base_path }
+    }
+
+    pub async fn tokens(&self) -> Result<Vec<TokenResponse>> {
+        let response = Client::new()
+            .get("https://token.jup.ag/strict")
+            .send()
+            .await?;
+        check_status_code_and_deserialize(response).await
     }
 
     pub async fn quote(&self, quote_request: &QuoteRequest) -> Result<QuoteResponse> {

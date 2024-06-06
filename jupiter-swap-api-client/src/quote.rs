@@ -111,3 +111,24 @@ pub struct QuoteResponse {
     #[serde(default)]
     pub time_taken: f64,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TokenResponse {
+    #[serde(with = "field_as_string")]
+    pub address: Pubkey,
+    pub chain_id: u16,
+    pub decimals: u8,
+    pub name: String,
+    pub symbol: String,
+    #[serde(rename = "logoURI")]
+    pub logo_uri: String,
+    pub tags: Vec<String>,
+    //pub extensions: Extension,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Extension {
+    coingecko_id: String,
+}
