@@ -16,3 +16,4 @@ serde = { version = "1.0.198", features = ["derive"] }
 serde_json = "1.0.116"
 log = "0.4.20"
 config-file = "0.2.3"
+pkg-config = "0.3.31"

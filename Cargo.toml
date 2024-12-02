@@ -2,7 +2,6 @@
 members = [
     "jupiter-swap-api-client",
     "dextrade",
-    "fortest"
 ]
 
 [workspace.package]

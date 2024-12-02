@@ -798,6 +798,7 @@ dependencies = [
  "docopt",
  "jupiter-swap-api-client",
  "log",
+ "pkg-config",
  "serde",
  "serde_json",
  "solana-client",
@@ -1095,10 +1096,6 @@ checksum = "a62bc1cf6f830c2ec14a513a9fb124d0a213a629668a4186f329db21fe045652"
 dependencies = [
  "percent-encoding",
 ]
-
-[[package]]
-name = "fortest"
-version = "0.1.0"
 
 [[package]]
 name = "futures"
@@ -2123,9 +2120,9 @@ dependencies = [
 
 [[package]]
 name = "pkg-config"
-version = "0.3.27"
+version = "0.3.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26072860ba924cbfa98ea39c8c19b4dd6a4a25423dbdf219c1eca91aa0cf6964"
+checksum = "953ec861398dccce10c670dfeaf3ec4911ca479e9c02154b3a215178c5f566f2"
 
 [[package]]
 name = "polyval"

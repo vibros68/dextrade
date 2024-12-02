@@ -1,4 +1,5 @@
 use std::fmt;
+use std::error::Error;
 
 pub struct DexError {
     code: String,
@@ -21,6 +22,9 @@ impl fmt::Display for DexError {
             self.code, self.message
         )
     }
+}
+
+impl Error for DexError {
 }
 
 // A unique format for dubugging output
