@@ -59,4 +59,6 @@ pub struct Swap {
     pub from_symbol: String,
     pub to_symbol: String,
     pub from_amount: f64,
+    pub vol24h_target: f64,
+    pub max24h_orders: f64,
 }

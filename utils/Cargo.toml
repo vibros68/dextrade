@@ -1,0 +1,10 @@
+[package]
+name = "utils"
+version = "0.1.0"
+description = ""
+edition = { workspace = true }
+
+[dependencies]
+anyhow = "1"
+reqwest = { version = "0.11.20", features = ["json"] }
+serde = { version = "1.0.159", features = ["derive"] }

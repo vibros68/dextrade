@@ -799,11 +799,13 @@ dependencies = [
  "jupiter-swap-api-client",
  "log",
  "pkg-config",
+ "reqwest",
  "serde",
  "serde_json",
  "solana-client",
  "solana-sdk",
  "tokio",
+ "utils",
 ]
 
 [[package]]
@@ -4018,6 +4020,15 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "reqwest",
+ "serde",
+]
 
 [[package]]
 name = "vcpkg"

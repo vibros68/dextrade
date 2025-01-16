@@ -1,9 +1,11 @@
 use std::fmt;
 use std::error::Error;
 
+
+
 pub struct DexError {
-    code: String,
-    message: String,
+    pub code: String,
+    pub message: String,
 }
 
 pub fn new(code: String,message: String) -> DexError{

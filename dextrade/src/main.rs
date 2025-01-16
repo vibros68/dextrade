@@ -1,16 +1,18 @@
 mod config;
 mod dex_error;
+mod runner;
+mod binance;
 
 use jupiter_swap_api_client::{
-    quote::QuoteRequest, swap::SwapRequest, transaction_config::TransactionConfig,
+    quote::QuoteRequest, //swap::SwapRequest, transaction_config::TransactionConfig,
     JupiterSwapApiClient,
 };
-use solana_client::nonblocking::rpc_client::RpcClient;
-// use solana_client::rpc_client::SerializableTransaction;
-use solana_sdk::{transaction::VersionedTransaction};
+//use solana_client::nonblocking::rpc_client::RpcClient;
+//use solana_sdk::{transaction::VersionedTransaction};
 use solana_sdk::signature::{ Signer, Keypair};
 use tokio;
 use jupiter_swap_api_client::quote::TokenResponse;
+use crate::runner::Runner;
 
 #[tokio::main]
 async fn main() {
@@ -31,7 +33,6 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
     println!("from address: [{}]",keypair.pubkey().to_string());
 
     let jupiter_client = JupiterSwapApiClient::new("https://quote-api.jup.ag/v6".into());
-
     let tokens = jupiter_client.tokens().await?;
     let from_token = match find_token_address(conf.swap.from_symbol.clone(),&tokens) {
         Some(from_token) => from_token,
@@ -56,12 +57,12 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
     let to_dec = u64::pow(10, to_token.decimals as u32);
     let quote_response = jupiter_client.quote(&quote_request).await?;
     let from_dec = u64::pow(10, from_token.decimals as u32);
-    let from_amount = from_amount as f64 / from_dec as f64;
+    let from_amount = from_amount / from_dec as f64;
     let to_amount = quote_response.out_amount as f64 / to_dec as f64;
     println!("trade {from_amount} ${} to {to_amount} ${}, rate {:.6}",
              from_token.symbol, to_token.symbol, to_amount/conf.swap.from_amount);
 
-    let swap_response = jupiter_client
+    /*let swap_response = jupiter_client
         .swap(&SwapRequest {
             user_public_key: keypair.pubkey(),
             quote_response: quote_response.clone(),
@@ -73,9 +74,6 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut  versioned_transaction: VersionedTransaction =
         bincode::deserialize(&swap_response.swap_transaction)?;
-    //versioned_transaction.get_recent_blockhash()
-
-    //println!("{}", versioned_transaction.)
 
     // send with rpc client...
     let solana_node = RpcClient::new("https://api.mainnet-beta.solana.com".into());
@@ -94,28 +92,15 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
     let client_result = solana_node
         .send_and_confirm_transaction(&signed_versioned_transaction)
         .await?;
-    println!("transaction id: [{}]", client_result.to_string());
-    // let signature = match res {
-    //     Ok(signature) =>  signature,
-    //     Err(error) => panic!("error: {:?}", error)
-    // };
-    // println!("{:?}", signature);
+    println!("transaction id: [{}]", client_result.to_string());*/
 
-    //rpc_client.send
-
-    // POST /swap-instructions
-    // let swap_instructions = jupiter_client
-    //     .swap_instructions(&SwapRequest {
-    //         user_public_key: keypair.pubkey(),
-    //         quote_response,
-    //         config: TransactionConfig::default(),
-    //     })
-    //     .await
-    //     .unwrap();
-    // println!("swap_instructions: {:?}",swap_instructions.token_ledger_instruction);
-
-
-    Ok(())
+    let runner = Runner::new(conf, from_token, to_token);
+    match runner.run().await {
+        Ok(()) => { Ok(()) },
+        Err(e) => {
+            Err(Box::new(e))
+        }
+    }
 }
 
 fn find_token_address(symbol: String, tokens: &Vec<TokenResponse>) -> Option<TokenResponse> {
