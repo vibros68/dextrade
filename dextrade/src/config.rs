@@ -61,4 +61,5 @@ pub struct Swap {
     pub from_amount: f64,
     pub vol24h_target: f64,
     pub max24h_orders: f64,
+    pub max_diff_rate: f64,
 }

@@ -1,9 +1,9 @@
 use reqwest::{Client};
 use anyhow::{Result};
 use serde::{Deserialize, Serialize};
-//use solana_sdk::pubkey::Pubkey;
+use serde_this_or_that::{as_f64};
 
-pub async fn get_ticker(market: &str) -> Result<MarketTicker> {
+pub async fn get_ticker(market: &str) -> Result<MarketTicker, anyhow::Error> {
     let response = Client::new().
         get(format!("https://api.binance.com/api/v3/ticker/24hr?symbol={market}")).
         send().await?;
@@ -13,24 +13,36 @@ pub async fn get_ticker(market: &str) -> Result<MarketTicker> {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct MarketTicker {
-    //#[serde(with = "field_as_string")]
     pub symbol: String,
-    #[serde(deserialize_with = "string_as_f64")]
+    #[serde(deserialize_with = "as_f64")]
     pub price_change: f64,
-    //#[serde(rename = "priceChangePercent")]
+    #[serde(deserialize_with = "as_f64")]
     pub price_change_percent: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub weighted_avg_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub prev_close_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub last_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub last_qty: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub bid_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub bid_qty: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub ask_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub ask_qty: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub open_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub high_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub low_price: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub volume: f64,
+    #[serde(deserialize_with = "as_f64")]
     pub quote_volume: f64,
     pub open_time: u64,
     pub close_time: u64,

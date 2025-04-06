@@ -29,8 +29,6 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Trading on jupiter...");
     println!("Loading configuration");
     let conf = config::get_config()?;
-    let keypair = Keypair::from_bytes(&conf.secret_key)?;
-    println!("from address: [{}]",keypair.pubkey().to_string());
 
     let jupiter_client = JupiterSwapApiClient::new("https://quote-api.jup.ag/v6".into());
     let tokens = jupiter_client.tokens().await?;
@@ -54,6 +52,8 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
         slippage_bps: 50,
         ..QuoteRequest::default()
     };
+    println!("{}",from_token.address);
+    println!("{}",to_token.address);
     let to_dec = u64::pow(10, to_token.decimals as u32);
     let quote_response = jupiter_client.quote(&quote_request).await?;
     let from_dec = u64::pow(10, from_token.decimals as u32);
@@ -94,7 +94,7 @@ async fn _main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     println!("transaction id: [{}]", client_result.to_string());*/
 
-    let runner = Runner::new(conf, from_token, to_token);
+    let runner = Runner::new(conf, jupiter_client, from_token, to_token);
     match runner.run().await {
         Ok(()) => { Ok(()) },
         Err(e) => {

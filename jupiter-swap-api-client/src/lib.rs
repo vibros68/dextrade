@@ -1,12 +1,14 @@
-use anyhow::{anyhow, Result};
-use quote::{QuoteRequest, QuoteResponse, TokenResponse};
+use std::collections::HashMap;
+
+use quote::{InternalQuoteRequest, QuoteRequest, QuoteResponse};
 use reqwest::{Client, Response};
 use serde::de::DeserializeOwned;
 use swap::{SwapInstructionsResponse, SwapInstructionsResponseInternal, SwapRequest, SwapResponse};
+use thiserror::Error;
 
 pub mod quote;
-mod route_plan_with_metadata;
-mod serde_helpers;
+pub mod route_plan_with_metadata;
+pub mod serde_helpers;
 pub mod swap;
 pub mod transaction_config;
 
@@ -15,23 +17,34 @@ pub struct JupiterSwapApiClient {
     pub base_path: String,
 }
 
-async fn check_is_success(response: Response) -> Result<Response> {
+#[derive(Debug, Error)]
+pub enum ClientError {
+    #[error("Request failed with status {status}: {body}")]
+    RequestFailed {
+        status: reqwest::StatusCode,
+        body: String,
+    },
+    #[error("Failed to deserialize response: {0}")]
+    DeserializationError(#[from] reqwest::Error),
+}
+
+async fn check_is_success(response: Response) -> Result<Response, ClientError> {
     if !response.status().is_success() {
-        return Err(anyhow!(
-            "Request status not ok: {}, body: {:?}",
-            response.status(),
-            response.text().await
-        ));
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        return Err(ClientError::RequestFailed { status, body });
     }
     Ok(response)
 }
 
-async fn check_status_code_and_deserialize<T: DeserializeOwned>(response: Response) -> Result<T> {
-    check_is_success(response)
-        .await?
+async fn check_status_code_and_deserialize<T: DeserializeOwned>(
+    response: Response,
+) -> Result<T, ClientError> {
+    let response = check_is_success(response).await?;
+    response
         .json::<T>()
         .await
-        .map_err(Into::into)
+        .map_err(ClientError::DeserializationError)
 }
 
 impl JupiterSwapApiClient {
@@ -39,26 +52,27 @@ impl JupiterSwapApiClient {
         Self { base_path }
     }
 
-    pub async fn tokens(&self) -> Result<Vec<TokenResponse>> {
+    pub async fn quote(&self, quote_request: &QuoteRequest) -> Result<QuoteResponse, ClientError> {
+        let url = format!("{}/quote", self.base_path);
+        let extra_args = quote_request.quote_args.clone();
+        let internal_quote_request = InternalQuoteRequest::from(quote_request.clone());
         let response = Client::new()
-            .get("https://token.jup.ag/strict")
+            .get(url)
+            .query(&internal_quote_request)
+            .query(&extra_args)
             .send()
             .await?;
         check_status_code_and_deserialize(response).await
     }
 
-    pub async fn quote(&self, quote_request: &QuoteRequest) -> Result<QuoteResponse> {
-        let query = serde_qs::to_string(&quote_request)?;
-        let response = Client::new()
-            .get(format!("{}/quote?{query}", self.base_path))
-            .send()
-            .await?;
-        check_status_code_and_deserialize(response).await
-    }
-
-    pub async fn swap(&self, swap_request: &SwapRequest) -> Result<SwapResponse> {
+    pub async fn swap(
+        &self,
+        swap_request: &SwapRequest,
+        extra_args: Option<HashMap<String, String>>,
+    ) -> Result<SwapResponse, ClientError> {
         let response = Client::new()
             .post(format!("{}/swap", self.base_path))
+            .query(&extra_args)
             .json(swap_request)
             .send()
             .await?;
@@ -68,7 +82,7 @@ impl JupiterSwapApiClient {
     pub async fn swap_instructions(
         &self,
         swap_request: &SwapRequest,
-    ) -> Result<SwapInstructionsResponse> {
+    ) -> Result<SwapInstructionsResponse, ClientError> {
         let response = Client::new()
             .post(format!("{}/swap-instructions", self.base_path))
             .json(swap_request)
